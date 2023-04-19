@@ -13,6 +13,7 @@
     "sfdcLoginUrl": "https://login.salesforce.com",
     "sourceApiVersion": "55.0",
     "packageAliases": {
-        "CreateScratchOrg": "0Ho8c00000000ovCAA"
+        "CreateScratchOrg": "0Ho8c00000000ovCAA",
+        "CreateScratchOrg@0.1.0-1-main": "04t8c0000013c27AAA"
     }
 }
