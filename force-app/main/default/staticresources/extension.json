@@ -1,0 +1,65 @@
+{
+  "recordTypeMap": {},
+  "RecordSetBundles": [
+    {
+      "Records": [
+        {
+          "attributes": {
+            "type": "copado__JobTemplate__c",
+            "url": "/services/data/v57.0/sobjects/copado__JobTemplate__c/a0u8c00004iXQvGAAW"
+          },
+          "copado__ApiName__c": "Create Scratch Org_1",
+          "copado__Type__c": "Custom",
+          "copado__Version__c": 1,
+          "Id": "a0u8c00004iXQvGAAW",
+          "LastReferencedDate": "2023-04-19T05:41:47.000+0000",
+          "LastViewedDate": "2023-04-19T05:41:47.000+0000",
+          "Name": "Create Scratch Org"
+        }
+      ],
+      "ObjectType": "copado__JobTemplate__c"
+    },
+    {
+      "Records": [
+        {
+          "attributes": {
+            "type": "copado__JobStep__c",
+            "url": "/services/data/v57.0/sobjects/copado__JobStep__c/a0t8c00000JfHQlAAN"
+          },
+          "copado__ApiName__c": "Create Scratch Org_1_create_1",
+          "copado__ConfigJson__c": "{\"functionName\":\"create_scratch_org\",\"parameters\":[{\"name\":\"ScratchOrgName\",\"value\":\"\",\"required\":true},{\"name\":\"git_json\",\"value\":\"{$Context.Repository.Credential}\",\"required\":true},{\"name\":\"provider\",\"value\":\"{$Context.Git_Provider__c}\",\"required\":false},{\"name\":\"SfdxAuthUrl\",\"value\":\"\",\"required\":true},{\"name\":\"DevHubInstanceUrl\",\"value\":\"\",\"required\":true},{\"name\":\"DevHubUsername\",\"value\":\"\",\"required\":true},{\"name\":\"pipeline\",\"value\":\"\",\"required\":true},{\"name\":\"DestinationEnvironmentListNumber\",\"value\":\"\",\"required\":false},{\"name\":\"DefinitionFile\",\"value\":\"\"}]}",
+          "copado__CustomType__c": "Function",
+          "copado__JobTemplate__c": "a0u8c00004iXQvGAAW",
+          "copado__Order__c": 1,
+          "copado__Type__c": "Function",
+          "Id": "a0t8c00000JfHQlAAN",
+          "Name": "create"
+        }
+      ],
+      "ObjectType": "copado__JobStep__c"
+    },
+    {
+      "Records": [
+        {
+          "attributes": {
+            "type": "copado__Function__c",
+            "url": "/services/data/v57.0/sobjects/copado__Function__c/a0l8c000009EJaBAAW"
+          },
+          "copado__API_Name__c": "create_scratch_org",
+          "copado__Image_Name__c": "copado-multicloud-metadata:v1",
+          "copado__Options__c": "[ ]",
+          "copado__Parameters__c": "[ {\n  \"required\" : true,\n  \"name\" : \"ScratchOrgName\",\n  \"defaultValue\" : \"\"\n}, {\n  \"required\" : true,\n  \"name\" : \"git_json\",\n  \"defaultValue\" : \"{$Context.Repository.Credential}\"\n}, {\n  \"required\" : false,\n  \"name\" : \"provider\",\n  \"defaultValue\" : \"{$Context.Git_Provider__c}\"\n}, {\n  \"required\" : true,\n  \"name\" : \"SfdxAuthUrl\",\n  \"defaultValue\" : \"\"\n}, {\n  \"required\" : true,\n  \"name\" : \"DevHubInstanceUrl\",\n  \"defaultValue\" : \"\"\n}, {\n  \"required\" : true,\n  \"name\" : \"DevHubUsername\",\n  \"defaultValue\" : \"\"\n}, {\n  \"required\" : true,\n  \"name\" : \"pipeline\",\n  \"defaultValue\" : \"\"\n}, {\n  \"required\" : false,\n  \"name\" : \"DestinationEnvironmentListNumber\",\n  \"defaultValue\" : \"\"\n}, {\n  \"name\" : \"DefinitionFile\",\n  \"defaultValue\" : \"\"\n} ]",
+          "copado__Script__c": "# Clone Repo\ncopado -p 'cloning repo'\necho \"provider:\"\necho \"$provider\"\necho \"***cloning repo 'copado-git-get main'\"\ncopado-git-get main\n\n# Create Branch\ncopado -p \"creating scratch org branch\"\necho \"***creating branch with name of scratch org 'copado-git-get -c $ScratchOrgName'\"\ncopado-git-get -c \"$ScratchOrgName\"\ngit push --set-upstream origin $ScratchOrgName\n\n# Authorize DevHub Org\ncopado -p 'authorizing devhub org'\necho \"***authorizing DevHub org using Sfdx Auth Url 'sfdx force:auth:sfdxurl:store -f /tmp/sfdx.url --setdefaultdevhubusername'\"\nexport SFDXURL_HUB=$SfdxAuthUrl\necho $SFDXURL_HUB > /tmp/sfdx.url\nsfdx force:auth:sfdxurl:store -f /tmp/sfdx.url --setdefaultdevhubusername\n\n# Set Default Instance Url\ncopado -p 'setting default instance url and devhub username'\necho \"***setting defaults 'sfdx config:set instanceUrl=https://copado108.my.salesforce.com defaultdevhubusername=c-ntrujillo-hjqs@force.com'\"\nsfdx config:set instanceUrl=$DevHubInstanceUrl defaultdevhubusername=$DevHubUsername\n\n# Create New Scratch Org with Specified Name\ncopado -p 'creating new scratch org'\necho \"***creating scratch org 'sfdx force:org:create -f config/project-scratch-def.json -t scratch -a $ScratchOrgName -d 30'\"\nif [[ -z $DefinitionFile ]]\nthen\n  sfdx force:org:create -f config/project-scratch-def.json -t scratch -a $ScratchOrgName -d 30\nelse\n  sfdx force:org:create -f $DefinitionFile -t scratch -a $ScratchOrgName -d 30\nfi\n  \n# Confirm New Scratch Org's Username, Alias, and Org Id\ncopado -p 'uploading active scratch org list'\necho \"***saving list of active scratch orgs to tmp/MyOrgList.json 'sfdx force:org:list --verbose --json > tmp/MyOrgList.json'\"\nsfdx force:org:list --verbose --json > /tmp/MyOrgList.json\n#copado -u /tmp/MyOrgList.json\n\n# Generate Password for New Scratch Org\ncopado -p 'generating password for new scratch org'\necho \"***generating password for new scratch org 'sfdx force:user:password:generate -u $ScratchOrgName'\"\nsfdx force:user:password:generate -u $ScratchOrgName\n\n# Review All Details of New Scratch Org\ncopado -p 'uploading details of new scratch org'\necho \"***saving details of new scratch org to tmp/MyOrgDesc.json 'sfdx force:user:display -u $ScratchOrgName --json > tmp/MyOrgDesc.json'\"\nsfdx force:user:display -u $ScratchOrgName --json > /tmp/$ScratchOrgName.json\ncopado -u /tmp/$ScratchOrgName.json\n\n# Install Copado CLI\ncopado -p \"installing copado cli\"\necho \"***updating sfdx plugins 'sfdx plugins:update'\"\necho y | sfdx plugins:install @copado/copado-cli\n\n# Authenticate Copado CLI\ncopado -p \"authenticating copado cli\"\necho \"***authenticating copado cli 'sfdx copado:auth:set -u $DevHubUsername'\"\nsfdx copado:auth:set -u $DevHubUsername\n\n# Create New Scratch Org Credential and Environment Records in Copado\ncopado -p \"creating credential & environment records for new scratch org\"\necho \"***creating new environment and credential records for new scratch org\"\nsfdx copado:environment:create --name $ScratchOrgName --type SFDX --json > /tmp/ScratchOrgEnvDetails.json\necho \"***saving response to '/tmp/ScratchOrgEnvDetails.json'\"\n#copado -u /tmp/ScratchOrgEnvDetails.json\n\n# Create Pipeline Connection for New Scratch Org in Copado\ncopado -p \"creating pipeline connection\"\necho \"***extracting environment record id from scratch org 'jq -r .result.id /tmp/ScratchOrgEnvDetails.json'\"\nScratchOrgEnvironment=`jq -r .result.id /tmp/ScratchOrgEnvDetails.json`\necho \"***creating pipeline connection 'sfdx copado:pipeline:connection:create --pipeline $pipeline --sourcebranch $ScratchOrgName --sourceenvironment ${ScratchOrgEnvironment}'\"\nif [[ -z $DestinationEnvironmentListNumber ]]\nthen\n  echo 1 | sfdx copado:pipeline:connection:create --pipeline $pipeline -b $ScratchOrgName -e ${ScratchOrgEnvironment} --json > /tmp/ScratchOrgPipelineConnectionDetails.json\nelse\n  echo $DestinationEnvironmentListNumber | sfdx copado:pipeline:connection:create --pipeline $pipeline -b $ScratchOrgName -e ${ScratchOrgEnvironment} --json > /tmp/ScratchOrgPipelineConnectionDetails.json\nfi",
+          "copado__Type__c": "Custom",
+          "copado__Worker_Size__c": "S",
+          "Id": "a0l8c000009EJaBAAW",
+          "LastReferencedDate": "2023-04-19T05:30:11.000+0000",
+          "LastViewedDate": "2023-04-19T05:30:11.000+0000",
+          "Name": "Create Scratch Org"
+        }
+      ],
+      "ObjectType": "copado__Function__c"
+    }
+  ],
+  "blobsByUID": {}
+}
