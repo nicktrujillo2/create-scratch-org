@@ -11,7 +11,7 @@
     "name": "Sample Copado Extension",
     "namespace": "",
     "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "54.0",
+    "sourceApiVersion": "55.0",
     "packageAliases": {
         "CreateScratchOrg": "0Ho8c00000000ovCAA"
     }
