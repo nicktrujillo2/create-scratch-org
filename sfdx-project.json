@@ -8,7 +8,7 @@
             "versionNumber": "0.1.0.NEXT"
         }
     ],
-    "name": "Sample Copado Extension",
+    "name": "Create Scratch Org",
     "namespace": "",
     "sfdcLoginUrl": "https://login.salesforce.com",
     "sourceApiVersion": "55.0",
